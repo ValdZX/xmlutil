@@ -42,6 +42,7 @@ import kotlin.test.*
 private fun String.normalize() = replace(" />", "/>")
     .replace("\r\n", "\n")
     .replace("&gt;", ">")
+    .replace(" ?>", "?>")
 
 fun JsonBuilder.defaultJsonTestConfiguration() {
     isLenient = true
@@ -178,6 +179,12 @@ class TestCommon {
         @Test
         fun testAlternativeXml() {
             val alternativeXml = "<valueContainer><![CDATA[<foo&]]>bar&gt;</valueContainer>"
+            assertEquals(value, baseXmlFormat.decodeFromString(serializer, alternativeXml))
+        }
+
+        @Test
+        fun testAlternativeXml2() {
+            val alternativeXml = "<valueContainer>&lt;foo&amp;bar&gt;</valueContainer>"
             assertEquals(value, baseXmlFormat.decodeFromString(serializer, alternativeXml))
         }
 
