@@ -25,6 +25,7 @@ package nl.adaptivity.xml.serialization
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerializationException
+import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonBuilder
 import kotlinx.serialization.modules.EmptySerializersModule
@@ -679,5 +680,24 @@ class TestCommon {
         val serialized = xml.encodeToString(Tag.serializer(), expectedObj)
         assertEquals(contentText, serialized)
     }
+
+
+    @Test
+    fun deserializeXmlWithEntity() {
+        val xml = XML {
+            repairNamespaces = true
+            policy = DefaultXmlSerializationPolicy(pedantic = false, autoPolymorphic = false)
+        }
+
+        val expected = StringWithMarkup("Chloroacetic acid, >=99%")
+
+        val actual = xml.decodeFromString<StringWithMarkup>(
+            "<StringWithMarkup xmlns=\"http://pubchem.ncbi.nlm.nih.gov/pug_view\">\n" +
+                    "    <String>Chloroacetic acid, &gt;=99%</String>\n" +
+                    "</StringWithMarkup>"
+                                                           )
+        assertEquals(expected, actual)
+    }
+
 
 }
