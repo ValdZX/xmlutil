@@ -59,7 +59,13 @@ interface XmlSerializationPolicy {
     fun isListEluded(serializerParent: SafeParentInfo, tagParent: SafeParentInfo): Boolean
     fun isTransparentPolymorphic(serializerParent: SafeParentInfo, tagParent: SafeParentInfo): Boolean
 
+    fun serialTypeNameToQName(typeNameInfo: DeclaredNameInfo, parentNamespace: Namespace): QName =
+        serialNameToQName(typeNameInfo.serialName, parentNamespace)
 
+    fun serialUseNameToQName(useNameInfo: DeclaredNameInfo, parentNamespace: Namespace): QName =
+        serialNameToQName(useNameInfo.serialName, parentNamespace)
+
+    @Deprecated("It is recommended to override serialTypeNameToQName and serialUseNameToQName instead")
     fun serialNameToQName(serialName: String, parentNamespace: Namespace): QName
 
     data class DeclaredNameInfo(val serialName: String, val annotatedName: QName?)
@@ -180,11 +186,11 @@ open class DefaultXmlSerializationPolicy(
                     serialKind == PolymorphicKind.OPEN ||
                     typeNameInfo.serialName == "kotlin.Unit" || // Unit needs a special case
                     parentSerialKind is PolymorphicKind // child of explict polymorphic uses predefined names
-                                               -> serialNameToQName(useName.serialName, parentNamespace)
+                                               -> serialUseNameToQName(useName, parentNamespace)
 
             typeNameInfo.annotatedName != null -> typeNameInfo.annotatedName
 
-            else                               -> serialNameToQName(typeNameInfo.serialName, parentNamespace)
+            else                               -> serialTypeNameToQName(typeNameInfo, parentNamespace)
         }
     }
 
